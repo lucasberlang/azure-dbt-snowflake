@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: This model cleans up customer data
+    columns:
+      - name: c_custkey
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: This model cleans up order data
+    columns:
+      - name: o_orderkey
+        description: Primary key
+        tests:
+          - unique
+          - not_null

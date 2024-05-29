@@ -1,0 +1,10 @@
+DOCKER_REGISTRY ?= dbtjobs.azurecr.io
+APPLICATION_REPOSITORY ?= dbt
+APPLICATION_NAME ?= $(shell basename "$(PWD)")
+DOCKER_VERSION ?= latest
+
+build:
+	docker build --platform linux/amd64 --tag ${DOCKER_REGISTRY}/${APPLICATION_REPOSITORY}/${APPLICATION_NAME}:${DOCKER_VERSION} .
+
+push:
+	docker push ${DOCKER_REGISTRY}/${APPLICATION_REPOSITORY}/${APPLICATION_NAME}:${DOCKER_VERSION}

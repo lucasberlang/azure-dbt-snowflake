@@ -1,0 +1,32 @@
+
+repos:
+  - repo: git://github.com/pre-commit/pre-commit-hooks
+    rev: v3.3.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: detect-aws-credentials
+      - id: mixed-line-ending
+  - repo: git://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.45.0
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_docs
+  - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
+    rev: v1.1.0
+    hooks:
+    - id: check-script-semicolon
+    - id: check-script-has-no-table-name
+    - id: dbt-test
+    - id: dbt-docs-generate
+    - id: check-model-has-all-columns
+      name: Check columns - core
+      files: ^models/core
+    - id: check-model-has-all-columns
+      name: Check columns - mart
+      files: ^models/mart
+    - id: check-model-columns-have-desc
+      files: ^models/mart

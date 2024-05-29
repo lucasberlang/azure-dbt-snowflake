@@ -1,0 +1,54 @@
+on: [push]
+name: DBT_Deploy_tpch_transform
+
+env:
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_CLIENT_SECRET: "${{ secrets.AZURE_CLIENT_SECRET }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+
+jobs:
+    build-and-push:
+        runs-on: ubuntu-latest
+        steps:
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+          
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+        - uses: azure/docker-login@v1
+          with:
+            login-server: dbtjobs.azurecr.io
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+
+        - run: |
+            docker build . -t dbtjobs.azurecr.io/dbt/tpch_transform:${{ github.sha }}
+            docker push dbtjobs.azurecr.io/dbt/tpch_transform:${{ github.sha }}
+          working-directory: ./tpch_transform
+    terraform-apply:
+        name: 'Terraform Apply'
+        needs: build-and-push
+        runs-on: ubuntu-latest
+        env:
+          ARM_SKIP_PROVIDER_REGISTRATION: true
+      
+        steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+  
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: "1.2.9"
+    
+        - name: Terraform Init
+          run: terraform init
+          working-directory: ./infra
+
+        - name: Terraform Apply
+          run: terraform apply -auto-approve -var='image_version=${{ github.sha }}'
+          working-directory: ./infra
